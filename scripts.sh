@@ -19,18 +19,25 @@ echo "Installing Ubuntu keyring and importing keys for aptly..."
 apt-get install -y ubuntu-keyring gnupg
 gpg --no-default-keyring --keyring /usr/share/keyrings/ubuntu-archive-keyring.gpg --export | gpg --no-default-keyring --keyring trustedkeys.gpg --import
 
-echo "Creating mirror..."
+echo "Creating mirrors..."
 # Check if mirror already exists to avoid errors on rerun
 if ! aptly mirror show interhost > /dev/null 2>&1; then
-    aptly mirror create -architectures=amd64 interhost https://ubuntu-archive.interhost.co.il/ubuntu focal main
+    aptly mirror create -architectures=amd64 interhost https://ubuntu-archive.interhost.co.il/ubuntu focal main universe restricted multiverse
 else
     echo "Mirror 'interhost' already exists, skipping creation."
 fi
 
-echo "Updating mirror (this may take a while)..."
-aptly mirror update interhost
+if ! aptly mirror show interhost-security > /dev/null 2>&1; then
+    aptly mirror create -architectures=amd64 interhost-security https://ubuntu-archive.interhost.co.il/ubuntu focal-security main universe restricted multiverse
+else
+    echo "Mirror 'interhost-security' already exists, skipping creation."
+fi
 
-echo "Creating snapshot..."
+echo "Updating mirrors (this may take a while)..."
+aptly mirror update interhost
+aptly mirror update interhost-security
+
+echo "Creating snapshots..."
 # Check if snapshot already exists
 if ! aptly snapshot show interhost-snapshot > /dev/null 2>&1; then
     aptly snapshot create interhost-snapshot from mirror interhost
@@ -38,12 +45,24 @@ else
     echo "Snapshot 'interhost-snapshot' already exists, skipping creation."
 fi
 
-echo "Publishing snapshot (without signing)..."
+if ! aptly snapshot show interhost-security-snapshot > /dev/null 2>&1; then
+    aptly snapshot create interhost-security-snapshot from mirror interhost-security
+else
+    echo "Snapshot 'interhost-security-snapshot' already exists, skipping creation."
+fi
+
+echo "Publishing snapshots (without signing)..."
 # Check if it's already published
 if ! aptly publish show focal > /dev/null 2>&1; then
     aptly publish snapshot -skip-signing interhost-snapshot
 else
-    echo "Snapshot already published."
+    echo "Snapshot 'interhost-snapshot' already published as focal."
+fi
+
+if ! aptly publish show focal-security > /dev/null 2>&1; then
+    aptly publish snapshot -skip-signing interhost-security-snapshot
+else
+    echo "Snapshot 'interhost-security-snapshot' already published as focal-security."
 fi
 
 echo "Done!"
