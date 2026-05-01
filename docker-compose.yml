@@ -1,0 +1,8 @@
+services:
+  aptly:
+    image: ubuntu:focal-20200423
+    container_name: aptly-mirror
+    volumes:
+      - ./ubuntu-aptly-archive:/root/.aptly
+      - ./scripts.sh:/scripts.sh
+    command: bash /scripts.sh
