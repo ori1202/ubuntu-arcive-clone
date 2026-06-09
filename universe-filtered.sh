@@ -46,11 +46,11 @@ fi
 
 echo "Publishing snapshot (without signing)..."
 
-if ! aptly publish show focal-universe universe-filtered > /dev/null 2>&1; then
+if ! aptly publish show focal-universe focal-universe-arm64-filtered-snapshot > /dev/null 2>&1; then
     aptly publish snapshot -skip-signing \
         -distribution=focal-universe \
         universe-nodejs-snapshot \
-        universe-filtered
+        focal-universe-arm64-filtered-snapshot
 else
     echo "Snapshot 'universe-nodejs-snapshot' already published, skipping."
 fi
