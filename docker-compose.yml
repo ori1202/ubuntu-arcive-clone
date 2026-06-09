@@ -6,3 +6,19 @@ services:
       - ./ubuntu-aptly-archive:/root/.aptly
       - ./scripts.sh:/scripts.sh
     command: bash /scripts.sh
+
+  aptly-docker:
+    image: ubuntu:focal-20200423
+    container_name: aptly-docker-mirror
+    volumes:
+      - ./ubuntu-aptly-archive:/root/.aptly
+      - ./docker-mirror.sh:/docker-mirror.sh
+    command: bash /docker-mirror.sh
+
+  aptly-universe-filtered:
+    image: ubuntu:focal-20200423
+    container_name: aptly-universe-filtered
+    volumes:
+      - ./ubuntu-aptly-archive:/root/.aptly
+      - ./universe-filtered.sh:/universe-filtered.sh
+    command: bash /universe-filtered.sh
